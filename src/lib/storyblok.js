@@ -1,8 +1,15 @@
 import Page from "@/components/Page";
-import Feature from "@/components/Feature";
-import Grid from "@/components/Grid";
-import Teaser from "@/components/Teaser";
 import Login from "@/components/Login";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import Banner from "@/components/Banner";
+import Container from "@/components/structure/Container";
+import Row from "@/components/structure/Row";
+import Col from "@/components/structure/Col";
+import Colx from "@/components/structure/Colx";
+import Text from "@/components/Text";
+import Image from "@/components/Image";
+
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
@@ -11,10 +18,17 @@ export const getStoryblokApi = storyblokInit({
   use: [apiPlugin],
   components: {
     page: Page,
-    feature: Feature,
-    grid: Grid,
-    teaser: Teaser,
-    login: Login
+    login: Login,
+    header: Header,
+    footer: Footer,
+    banner: Banner,
+    container: Container,
+    row: Row,
+    col: Col,
+    colx: Colx,
+    text: Text,
+    image: Image,
+    
   },
   apiOptions: {
     region: 'eu',
