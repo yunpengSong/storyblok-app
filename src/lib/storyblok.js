@@ -9,7 +9,10 @@ import Col from "@/components/structure/Col";
 import Colx from "@/components/structure/Colx";
 import Text from "@/components/Text";
 import Image from "@/components/Image";
-
+import CardBox from "@/components/CardBox";
+import Link from "@/components/LinkComponent";
+import Button from "@/components/Button";
+import List from "@/components/List";
 
 import { apiPlugin, storyblokInit } from '@storyblok/react/rsc';
 
@@ -28,6 +31,10 @@ export const getStoryblokApi = storyblokInit({
     colx: Colx,
     text: Text,
     image: Image,
+    cardbox: CardBox,
+    link: Link,
+    button: Button,
+    list: List,
     
   },
   apiOptions: {

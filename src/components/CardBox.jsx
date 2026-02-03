@@ -1,8 +1,9 @@
 import { storyblokEditable, StoryblokServerComponent } from "@storyblok/react/rsc";
+import { parseStyle } from '@/utils/styleParser';
 
-export default function ColX({ blok }) {
+export default function CardBox({ blok }) {
   return (
-      <div {...storyblokEditable(blok)} className={`${blok.class} col-lg-${blok.colnum}`}>
+      <div {...storyblokEditable(blok)} className={`${blok.class}`} style={parseStyle(blok.style)}>
           {blok.content?.map((nestedBlok) => (
                 <StoryblokServerComponent blok={nestedBlok} key={nestedBlok._uid} />
             ))}
