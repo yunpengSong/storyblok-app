@@ -3,12 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 13001",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "next start -p 13001",
+    "lint": "eslint",
+    "init-db": "node --env-file=.env scripts/init-db.js"
   },
   "dependencies": {
+    "@storyblok/react": "^5.4.21",
+    "bcryptjs": "^3.0.3",
+    "bootstrap": "^5.3.8",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.4",
     "next": "16.1.5",
     "react": "19.2.3",
     "react-dom": "19.2.3"

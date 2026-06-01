@@ -1,5 +1,6 @@
 import Page from "@/components/Page";
 import Login from "@/components/Login";
+import Register from "@/components/Register";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Banner from "@/components/Banner";
@@ -22,6 +23,7 @@ export const getStoryblokApi = storyblokInit({
   components: {
     page: Page,
     login: Login,
+    register: Register,
     header: Header,
     footer: Footer,
     banner: Banner,

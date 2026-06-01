@@ -9,7 +9,7 @@ import Image from 'next/image';
 export default function Footer({ blok }) {
 
   return (
-      <footer {...storyblokEditable(blok)} className="footer bg-grey pb-4 pt-5 mt-5">
+      <footer {...storyblokEditable(blok)} className="footer bg-grey pb-4 pt-5">
           <div className="container pt-3">
               <div className="row align-items-center">
               <div className="col-12 pt-2">

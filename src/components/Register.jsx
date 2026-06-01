@@ -5,9 +5,13 @@ import { useRouter } from 'next/navigation';
 import { storyblokEditable } from "@storyblok/react/rsc";
 import { useAuth } from '@/context/AuthContext';
 
-export default function Login({ blok }) {
+export default function Register({ blok }) {
+  const [title, setTitle] = useState('Prof');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [errorMessage, setErrorMessage] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
@@ -27,23 +31,42 @@ export default function Login({ blok }) {
 
     setErrorMessage('');
     setShowSuccess(false);
+
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/login', {
+      const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ title, firstName, lastName, email, password }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
         setShowSuccess(true);
-        await checkAuth();
-        setTimeout(() => router.push('/'), 1000);
+        // 注册成功后自动登录
+        const loginRes = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        if (loginRes.ok) {
+          await checkAuth();
+          setTimeout(() => router.push('/'), 1000);
+        }
       } else {
-        setErrorMessage(data.message || 'Email or Password error.');
+        setErrorMessage(data.message || 'Registration failed.');
       }
     } catch (err) {
       setErrorMessage('Something went wrong.');
@@ -62,7 +85,7 @@ export default function Login({ blok }) {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          background: blok.backgroundColor || '#f3f4f6',
+          background: blok?.backgroundColor || '#f3f4f6',
         }}
       >
         <p>Loading...</p>
@@ -82,7 +105,7 @@ export default function Login({ blok }) {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        background: blok.backgroundColor || '#f3f4f6',
+        background: blok?.backgroundColor || '#f3f4f6',
       }}
     >
       <form
@@ -97,8 +120,40 @@ export default function Login({ blok }) {
         }}
       >
         <h1 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          {blok.title || 'Login'}
+          {blok?.title || 'Register'}
         </h1>
+
+        <label>Title</label>
+        <select
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          disabled={isSubmitting}
+          style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem', borderRadius: '0.25rem', border: '1px solid #ccc' }}
+        >
+          <option value="Prof">Prof</option>
+          <option value="A/Prof">A/Prof</option>
+          <option value="Dr">Dr</option>
+        </select>
+
+        <label>First Name</label>
+        <input
+          type="text"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          required
+          disabled={isSubmitting}
+          style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem', borderRadius: '0.25rem', border: '1px solid #ccc' }}
+        />
+
+        <label>Last Name</label>
+        <input
+          type="text"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          required
+          disabled={isSubmitting}
+          style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem', borderRadius: '0.25rem', border: '1px solid #ccc' }}
+        />
 
         <label>Email</label>
         <input
@@ -115,6 +170,16 @@ export default function Login({ blok }) {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+          disabled={isSubmitting}
+          style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem', borderRadius: '0.25rem', border: '1px solid #ccc' }}
+        />
+
+        <label>Confirm Password</label>
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
           disabled={isSubmitting}
           style={{ width: '100%', padding: '0.5rem', marginBottom: '1.5rem', borderRadius: '0.25rem', border: '1px solid #ccc' }}
@@ -134,7 +199,7 @@ export default function Login({ blok }) {
             border: 'none',
           }}
         >
-          {isSubmitting ? 'Loading...' : (blok.buttonText || 'Login')}
+          {isSubmitting ? 'Loading...' : (blok?.buttonText || 'Register')}
         </button>
 
         {/* 错误提示 */}
@@ -147,7 +212,7 @@ export default function Login({ blok }) {
         {/* 成功提示 */}
         {showSuccess && (
           <p style={{ color: 'green', marginTop: '1rem', textAlign: 'center' }}>
-            {blok.successText || 'Login success.'}
+            {blok?.successText || 'Registration successful!'}
           </p>
         )}
       </form>

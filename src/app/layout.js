@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import StoryblokProvider from "@/components/StoryblokProvider";
 import BootstrapClient from '@/components/BootstrapClient';
+import { AuthProvider } from '@/context/AuthContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,12 +22,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <StoryblokProvider>
-      <html lang="en">
-        <body>
-          <BootstrapClient />
-          {children}
-        </body>
-      </html>
+      <AuthProvider>
+        <html lang="en">
+          <body>
+            <BootstrapClient />
+            {children}
+          </body>
+        </html>
+      </AuthProvider>
     </StoryblokProvider>
   );
 }
