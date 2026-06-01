@@ -2,6 +2,7 @@ import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 
 // MySQL 连接配置
+const isProduction = process.env.NODE_ENV === 'production';
 const dbConfig = {
   host: process.env.MYSQL_HOST || 'localhost',
   port: parseInt(process.env.MYSQL_PORT || '3306'),
@@ -10,7 +11,9 @@ const dbConfig = {
   database: process.env.MYSQL_DATABASE || 'storyblok',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  // PlanetScale 需要 SSL
+  ssl: process.env.MYSQL_HOST !== 'localhost' ? { rejectUnauthorized: true } : undefined
 };
 
 // 创建连接池
