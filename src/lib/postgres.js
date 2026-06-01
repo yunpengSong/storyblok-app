@@ -3,17 +3,28 @@ import bcrypt from 'bcryptjs';
 
 const { Pool } = pg;
 
-// PostgreSQL 连接配置
-const isLocalhost = process.env.MYSQL_HOST === 'localhost' || !process.env.MYSQL_HOST;
-const dbConfig = {
-  host: process.env.MYSQL_HOST || 'localhost',
-  port: parseInt(process.env.MYSQL_PORT || '5432'),
-  user: process.env.MYSQL_USER || 'postgres',
-  password: process.env.MYSQL_PASSWORD || '',
-  database: process.env.MYSQL_DATABASE || 'postgres',
-  max: 10,
-  ssl: !isLocalhost ? { rejectUnauthorized: false } : false
-};
+// PostgreSQL 连接配置 - 支持 Neon (DATABASE_URL) 和单独配置
+let dbConfig;
+if (process.env.DATABASE_URL) {
+  // Neon 使用连接字符串
+  dbConfig = {
+    connectionString: process.env.DATABASE_URL,
+    max: 10,
+    ssl: { rejectUnauthorized: false }
+  };
+} else {
+  // 本地开发使用单独配置
+  const isLocalhost = process.env.PG_HOST === 'localhost' || !process.env.PG_HOST;
+  dbConfig = {
+    host: process.env.PG_HOST || 'localhost',
+    port: parseInt(process.env.PG_PORT || '5432'),
+    user: process.env.PG_USER || 'postgres',
+    password: process.env.PG_PASSWORD || '',
+    database: process.env.PG_DATABASE || 'postgres',
+    max: 10,
+    ssl: !isLocalhost ? { rejectUnauthorized: false } : false
+  };
+}
 
 // 创建连接池
 let pool;
