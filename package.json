@@ -10,13 +10,14 @@
     "init-db": "node --env-file=.env scripts/init-db.js"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@storyblok/react": "^5.4.21",
     "bcryptjs": "^3.0.3",
     "bootstrap": "^5.3.8",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.11.0",
-    "pg": "^8.13.3",
     "next": "16.1.5",
+    "pg": "^8.13.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

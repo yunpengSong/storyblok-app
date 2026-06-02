@@ -1,49 +1,28 @@
-import pg from 'pg';
+import { neon } from '@neondatabase/serverless';
 import bcrypt from 'bcryptjs';
 
-const { Pool } = pg;
-
-// PostgreSQL 连接配置 - 支持 Neon (DATABASE_URL) 和单独配置
-let dbConfig;
-if (process.env.DATABASE_URL) {
-  // Neon 使用连接字符串
-  dbConfig = {
-    connectionString: process.env.DATABASE_URL,
-    max: 10,
-    ssl: { rejectUnauthorized: false }
-  };
-} else {
-  // 本地开发使用单独配置
-  const isLocalhost = process.env.PG_HOST === 'localhost' || !process.env.PG_HOST;
-  dbConfig = {
-    host: process.env.PG_HOST || 'localhost',
-    port: parseInt(process.env.PG_PORT || '5432'),
-    user: process.env.PG_USER || 'postgres',
-    password: process.env.PG_PASSWORD || '',
-    database: process.env.PG_DATABASE || 'postgres',
-    max: 10,
-    ssl: !isLocalhost ? { rejectUnauthorized: false } : false
-  };
-}
-
-// 创建连接池
-let pool;
+// 创建 SQL 客户端
+let sql;
 let initialized = false;
 
-export function getPool() {
-  if (!pool) {
-    pool = new Pool(dbConfig);
+export function getSql() {
+  if (!sql) {
+    sql = neon(process.env.DATABASE_URL || '');
   }
-  return pool;
+  return sql;
 }
 
 // 初始化数据库表
 export async function initDatabase() {
   if (initialized) return;
+  if (!process.env.DATABASE_URL) {
+    console.log('DATABASE_URL not set, skipping database init');
+    return;
+  }
 
-  const client = await getPool().connect();
+  const sql = getSql();
   try {
-    await client.query(`
+    await sql`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         title VARCHAR(50),
@@ -54,26 +33,26 @@ export async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+    `;
 
     // 添加测试用户
     const testEmail = 'test@test.com';
     const testPassword = '123456';
-    const result = await client.query('SELECT id FROM users WHERE email = $1', [testEmail]);
+    const result = await sql`SELECT id FROM users WHERE email = ${testEmail}`;
 
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       const hashedPassword = await bcrypt.hash(testPassword, 10);
-      await client.query(
-        'INSERT INTO users (email, password, title, first_name, last_name) VALUES ($1, $2, $3, $4, $5)',
-        [testEmail, hashedPassword, 'Dr', 'Test', 'User']
-      );
+      await sql`
+        INSERT INTO users (email, password, title, first_name, last_name)
+        VALUES (${testEmail}, ${hashedPassword}, ${'Dr'}, ${'Test'}, ${'User'})
+      `;
       console.log(`Test user created: ${testEmail} / ${testPassword}`);
     }
 
     console.log('Database initialized.');
     initialized = true;
-  } finally {
-    client.release();
+  } catch (error) {
+    console.error('Database init error:', error);
   }
 }
 
@@ -82,23 +61,24 @@ export const postgresDb = {
   users: {
     create: async (data) => {
       await initDatabase();
-      const pool = getPool();
-      const result = await pool.query(
-        'INSERT INTO users (title, first_name, last_name, email, password) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-        [data.title, data.firstName, data.lastName, data.email, data.password]
-      );
-      return { id: result.rows[0].id, email: data.email };
+      const sql = getSql();
+      const result = await sql`
+        INSERT INTO users (title, first_name, last_name, email, password)
+        VALUES (${data.title}, ${data.firstName}, ${data.lastName}, ${data.email}, ${data.password})
+        RETURNING id
+      `;
+      return { id: result[0].id, email: data.email };
     },
     findUnique: async ({ where }) => {
       await initDatabase();
-      const pool = getPool();
+      const sql = getSql();
       if (where.email) {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [where.email]);
-        return result.rows[0] || null;
+        const result = await sql`SELECT * FROM users WHERE email = ${where.email}`;
+        return result[0] || null;
       }
       if (where.id) {
-        const result = await pool.query('SELECT * FROM users WHERE id = $1', [where.id]);
-        return result.rows[0] || null;
+        const result = await sql`SELECT * FROM users WHERE id = ${where.id}`;
+        return result[0] || null;
       }
       return null;
     }
